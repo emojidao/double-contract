@@ -19,7 +19,7 @@ contract WrapDoNFT is BaseDoNFT,IWrapDoNFT{
     }
     
     function couldRedeem(uint256 tokenId,uint256[] calldata durationIds) public view returns(bool) {
-        require(!isWNft(tokenId) , "not wNFT") ;
+        require(isWNft(tokenId) , "not wNFT") ;
         DoNftInfo storage info = doNftMapping[tokenId];
         Duration storage duration = durationMapping[durationIds[0]];
         if(duration.start > block.timestamp){
