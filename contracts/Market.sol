@@ -78,13 +78,12 @@ contract Market is OwnableContract,ReentrancyGuard,IMarket{
         if(!(startTime == block.timestamp && endTime== dEnd)){
             require((endTime-startTime) >= lending.minDuration,"duration < minDuration");
         }
-        require(IBaseDoNFT(nftAddress).getNonce(tokenId) == lending.nonce,"diff nonce");
         distributePayment(nftAddress, tokenId, startTime, endTime);
         tid = IBaseDoNFT(nftAddress).mint(tokenId, durationId, startTime, endTime, msg.sender);
         emit MakeDeal(msg.sender, lending.lender, lending.nftAddress, lending.nftId, startTime, endTime, lending.pricePerSecond);
     }
 
-    function makeDealNow(address nftAddress,uint256 tokenId,uint256 durationId,uint64 duration) public nonReentrant payable virtual returns(uint256 tid){
+    function makeDealNow(address nftAddress,uint256 tokenId,uint256 durationId,uint64 duration) public payable virtual returns(uint256 tid){
         tid = makeDeal(nftAddress, tokenId, durationId, uint64(block.timestamp), uint64(block.timestamp + duration));
     }
 

@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./OwnableContract.sol";
 import "./IBaseDoNFT.sol";
 
-contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT{
+contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT {
     using EnumerableSet for EnumerableSet.UintSet;
     address internal oNftAddress;
     uint256 public curDoid;
@@ -114,7 +114,7 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT{
 
     function mintWNft(uint256 oid) public nonReentrant virtual returns(uint256 tid) {
         require(oid2Wid[oid] == 0, "already warped");
-        require(onlyApprovedOrOwner(tx.origin,oNftAddress,oid) || onlyApprovedOrOwner(msg.sender,oNftAddress,oid));
+        require(onlyApprovedOrOwner(tx.origin,oNftAddress,oid) || onlyApprovedOrOwner(msg.sender,oNftAddress,oid),"not owner nor approved");
         address owner = ERC721(oNftAddress).ownerOf(oid);
         tid = mintDoNft(owner,oid,uint64(block.timestamp),type(uint64).max);
         oid2Wid[oid] = tid;
@@ -128,16 +128,19 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT{
         uint64 end,
         address to
     ) public onlyNow(start) nonReentrant returns(uint256 tid){
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "not owner nor approved");
+        require(_isApprovedOrOwner(_msgSender(), tokenId) || _isApprovedOrOwner(tx.origin, tokenId), "not owner nor approved");
         require(start >= block.timestamp && end > start && end <= block.timestamp + maxDuration, "invalid start or end");
         DoNftInfo storage info = doNftMapping[tokenId];
         require(contains(tokenId,durationId), "not contains durationId");
         Duration storage duration = durationMapping[durationId];
+        uint256 tDurationId;
         if (start == duration.start && end == duration.end) {
             tid = mintDoNft(to,info.oid,start,end);
+            tDurationId = curDurationId;
             _burnDuration(tokenId, durationId);
         } else {
             tid = mintDoNft(to, info.oid,start,end);
+            tDurationId = curDurationId;
             if (start > block.timestamp && start > duration.start + 1) {
                 newDuration(tokenId, duration.start, start-1);
             }
@@ -147,7 +150,7 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT{
         }
         
         if(start==block.timestamp){
-            checkIn(to, tokenId, durationId);
+            checkIn(to, tid, tDurationId);
         }
         emit MetadataUpdate(tokenId);
         
@@ -234,8 +237,8 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT{
         require(_isApprovedOrOwner(_msgSender(), tokenId) || _isApprovedOrOwner(tx.origin, tokenId), "not owner nor approved");
         DoNftInfo storage info = doNftMapping[tokenId];
         Duration storage duration = durationMapping[durationId];
-        require(duration.end > block.timestamp);
-        require(duration.start < block.timestamp);
+        require(duration.end >= block.timestamp,"invalid end");
+        require(duration.start <= block.timestamp,"invalid start");
         require(info.durationList.contains(durationId),"not contains");
         checkInUser = to;
         checkInDurationId = durationId;
@@ -276,6 +279,10 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT{
 
     function getOrignalNftAddress() external view returns(address){
         return oNftAddress;
+    }
+
+    function getWNftId(uint256 originalNftId) public view returns(uint256) {
+        return oid2Wid[originalNftId] ;
     }
 
     function onERC721Received(address operator,address from,uint256 tokenId,bytes calldata data
