@@ -46,20 +46,8 @@ contract DoNFTFactory is OwnableContract{
         vritualDoNftImplementation = imp;
     }
 
-    function getWrapDoNftImplementation() public view returns(address){
-        return wrapDoNftImplementation;
-    }
-
-    function getVritualDoNftImplementation() public view returns(address) {
-        return vritualDoNftImplementation;
-    }
-
     function getWrapDoNftImplementation(address nftAddress) public view returns(address){
         return wrapDoNftMap[nftAddress];
-    }
-
-    function getVritualDoNftImplementation(address nftAddress,address gameKey) public view returns(address){
-        return vritualDoNftMap[nftAddress][gameKey];
     }
 
 

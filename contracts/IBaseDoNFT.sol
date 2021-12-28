@@ -48,11 +48,9 @@ interface IBaseDoNFT is IERC721Receiver {
 
     function getDuration(uint256 tokenId,uint256 index) external view returns(uint256 durationId,uint64 start, uint64 end);
 
-    function getWNftId(uint256 originalNftId) external view returns(uint256);
-
     function isValidNow(uint256 tokenId) external view returns(bool isValid);
 
-    function getOrignalNftAddress() external view returns(address);
+    function getoNftAddress() external view returns(address);
 
     function checkIn(address to,uint256 tokenId,uint256 durationId) external;
 
