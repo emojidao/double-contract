@@ -80,7 +80,7 @@ contract Market is OwnableContract,ReentrancyGuard,IMarket{
         }
         distributePayment(nftAddress, tokenId, startTime, endTime);
         tid = IBaseDoNFT(nftAddress).mint(tokenId, durationId, startTime, endTime, msg.sender);
-        emit MakeDeal(msg.sender, lending.lender, lending.nftAddress, lending.nftId, startTime, endTime, lending.pricePerSecond);
+        emit MakeDeal(msg.sender, lending.lender, lending.nftAddress, lending.nftId, startTime, endTime, lending.pricePerSecond,tid);
     }
 
     function makeDealNow(address nftAddress,uint256 tokenId,uint256 durationId,uint64 duration) public payable virtual returns(uint256 tid){

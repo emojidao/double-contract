@@ -28,16 +28,16 @@ interface IMarket {
         mapping(uint256=>Lending) lendingMap;
     }
 
-    event OnLent(address lender,address nftAddress,uint256 nftId,uint64 maxEndTime,uint64 minDuration,uint256 secondPrice);
+    event OnLent(address lender,address nftAddress,uint256 nftId,uint64 maxEndTime,uint64 minDuration,uint256 pricePerSecond);
     event OffLent(address lender,address nftAddress,uint256 nftId);
-    event MakeDeal(address renter,address lender,address nftAddress,uint256 nftId,uint64 startTime,uint64 endTime,uint256 secondPrice);
+    event MakeDeal(address renter,address lender,address nftAddress,uint256 nftId,uint64 startTime,uint64 endTime,uint256 pricePerSecond,uint256 newId);
     
     function mintWNftAndOnLent(
         address resolverAddress,
         uint256 oNftId,
         uint64 maxEndTime,
         uint64 minDuration,
-        uint256 secondPrice
+        uint256 pricePerSecond
     ) external ;
 
     function onLent(
@@ -45,7 +45,7 @@ interface IMarket {
         uint256 nftId,
         uint64 maxEndTime,
         uint64 minDuration,
-        uint256 secondPrice
+        uint256 pricePerSecond
     ) external;
 
     function offLent(address nftAddress,uint256 nftId) external;

@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "./OwnableContract.sol";
 import "./IBaseDoNFT.sol";
 
@@ -21,6 +22,7 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT {
     string private _doSymbol;
     address public checkInUser;
     uint256 public checkInDurationId;
+    string private _dclURI;
     
     constructor()ERC721("DoNFT","DoNFT"){
     }
@@ -303,6 +305,14 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT {
         return
             interfaceId == type(IBaseDoNFT).interfaceId ||
             super.supportsInterface(interfaceId);
+    }
+
+    function setBaseURI(string memory newBaseURI) public onlyOwner {
+        _dclURI = newBaseURI;
+    }
+
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory){
+        return string(abi.encodePacked(_dclURI, Strings.toString(tokenId)));
     }
 
     
