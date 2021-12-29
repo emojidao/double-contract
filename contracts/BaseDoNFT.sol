@@ -17,6 +17,7 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT {
     mapping(uint256 => DoNftInfo) internal doNftMapping;
     mapping(uint256 => Duration) internal durationMapping;
     mapping(uint256 => uint256) internal oid2Wid;
+
     bool private isOnlyNow = true;
     string private _doName;
     string private _doSymbol;
@@ -135,6 +136,7 @@ contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721,IBaseDoNFT {
         DoNftInfo storage info = doNftMapping[tokenId];
         require(contains(tokenId,durationId), "not contains durationId");
         Duration storage duration = durationMapping[durationId];
+        require(start >= duration.start && end <= duration.end, "invalid duration");
         uint256 tDurationId;
         if (start == duration.start && end == duration.end) {
             tid = mintDoNft(to,info.oid,start,end);
