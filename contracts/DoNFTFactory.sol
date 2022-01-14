@@ -8,32 +8,32 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract DoNFTFactory is OwnableContract{
     /**nftAddress => (gameKey => doNFT) */
-    mapping(address => mapping(address => address)) vritualDoNftMap;
-    mapping(address => address) wrapDoNftMap;
+    mapping(address => mapping(string => address)) virtualDoNftMap;
+    mapping(address => mapping(string => address)) wrapDoNftMap;
     mapping(address => address) doNftToNft;
-    address private vritualDoNftImplementation;
+    address private virtualDoNftImplementation;
     address private wrapDoNftImplementation;
 
     constructor(){
-        
+        initOwnableContract();
     }
 
-    function createVritualDoNFT(address nftAddress,address gameKey,string calldata name, string calldata symbol) external returns(address) {
+    function createVirtualDoNFT(address nftAddress,string calldata gameKey,string calldata name, string calldata symbol) external returns(address) {
         require(IERC165(nftAddress).supportsInterface(type(IERC721).interfaceId),"no 721");
-        require(vritualDoNftMap[nftAddress][gameKey] == address(0),"already create");
-        address clone = Clones.clone(vritualDoNftImplementation);
+        require(virtualDoNftMap[nftAddress][gameKey] == address(0),"already create");
+        address clone = Clones.clone(virtualDoNftImplementation);
         IBaseDoNFT(clone).init(nftAddress,name, symbol);
-        vritualDoNftMap[nftAddress][gameKey] = clone;
+        virtualDoNftMap[nftAddress][gameKey] = clone;
         doNftToNft[clone] = nftAddress;
         return clone;
     }
 
-    function createWrapDoNFT(address nftAddress,string calldata name, string calldata symbol) external returns(address) {
+    function createWrapDoNFT(address nftAddress,string calldata gameKey,string calldata name, string calldata symbol) external returns(address) {
         require(IERC165(nftAddress).supportsInterface(type(IERC721).interfaceId),"no 721");
-        require(wrapDoNftMap[nftAddress] == address(0),"already create");
+        require(wrapDoNftMap[nftAddress][gameKey] == address(0),"already create");
         address clone = Clones.clone(wrapDoNftImplementation);
         IBaseDoNFT(clone).init(nftAddress,name, symbol);
-        wrapDoNftMap[nftAddress] = clone;
+        wrapDoNftMap[nftAddress][gameKey] = clone;
         doNftToNft[clone] = nftAddress;
         return clone;
     }
@@ -42,24 +42,24 @@ contract DoNFTFactory is OwnableContract{
         wrapDoNftImplementation = imp;
     }
 
-    function setVritualDoNftImplementation(address imp) public onlyAdmin {
-        vritualDoNftImplementation = imp;
+    function setVirtualDoNftImplementation(address imp) public onlyAdmin {
+        virtualDoNftImplementation = imp;
     }
 
     function getWrapDoNftImplementation() public view returns(address){
         return wrapDoNftImplementation;
     }
 
-    function getVritualDoNftImplementation() public view returns(address) {
-        return vritualDoNftImplementation;
+    function getVirtualDoNftImplementation() public view returns(address) {
+        return virtualDoNftImplementation;
     }
 
-    function getWrapDoNftImplementation(address nftAddress) public view returns(address){
-        return wrapDoNftMap[nftAddress];
+    function getWrapDoNftImplementation(address nftAddress,string calldata gameKey) public view returns(address){
+        return wrapDoNftMap[nftAddress][gameKey];
     }
 
-    function getVritualDoNftImplementation(address nftAddress,address gameKey) public view returns(address){
-        return vritualDoNftMap[nftAddress][gameKey];
+    function getVirtualDoNftImplementation(address nftAddress,string calldata gameKey) public view returns(address){
+        return virtualDoNftMap[nftAddress][gameKey];
     }
 
 

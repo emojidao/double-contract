@@ -8,18 +8,29 @@ import "./BaseDoNFT.sol";
 contract WrapDoNFT is BaseDoNFT,IWrapDoNFT{
     using EnumerableSet for EnumerableSet.UintSet;
 
-    function mintWNft(uint256 oid) public override returns(uint256 tid){
-        require(oid2Wid[oid] == 0, "already warped");
-        require(onlyApprovedOrOwner(tx.origin,oNftAddress,oid) || onlyApprovedOrOwner(msg.sender,oNftAddress,oid));
+    function mintXNft(uint256 oid) public nonReentrant override returns(uint256 tid){
+        require(oid2xid[oid] == 0, "already warped");
+        require(onlyApprovedOrOwner(tx.origin,oNftAddress,oid) || onlyApprovedOrOwner(msg.sender,oNftAddress,oid),"only approved or owner");
         address lastOwner = ERC721(oNftAddress).ownerOf(oid);
         ERC721(oNftAddress).safeTransferFrom(lastOwner, address(this), oid);
         tid = mintDoNft(lastOwner,oid,uint64(block.timestamp),type(uint64).max);
-        oid2Wid[oid] = tid;
-        emit MintWNft(tx.origin,lastOwner,oid,tid);
+        oid2xid[oid] = tid;
+    }
+
+    function isWNft(uint256 tokenId)public view returns (bool){
+        return isXNft(tokenId);
+    }
+
+    function getWNftId(uint256 oid) public view returns(uint256){
+        return getXNftId(oid);
+    }
+
+    function mintWNft(uint256 oid) public returns(uint256 tid){
+        tid = mintXNft(oid);
     }
     
     function couldRedeem(uint256 tokenId,uint256[] calldata durationIds) public view returns(bool) {
-        require(isWNft(tokenId) , "not wNFT") ;
+        require(isXNft(tokenId) , "not xNFT") ;
         DoNftInfo storage info = doNftMapping[tokenId];
         Duration storage duration = durationMapping[durationIds[0]];
         if(duration.start > block.timestamp){
@@ -43,7 +54,7 @@ contract WrapDoNFT is BaseDoNFT,IWrapDoNFT{
         require(couldRedeem(tokenId, durationIds),"cannot redeem");
         DoNftInfo storage info = doNftMapping[tokenId];
         ERC721(oNftAddress).safeTransferFrom(address(this), ownerOf(tokenId), info.oid);
-        _burnWNft(tokenId);
+        _burnXNft(tokenId);
         emit Redeem(info.oid,tokenId);
     }
 

@@ -3,7 +3,6 @@ pragma solidity 0.8.10;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "./OwnableContract.sol";
 
 interface IBaseDoNFT is IERC721Receiver {
     struct Duration{
@@ -16,7 +15,6 @@ interface IBaseDoNFT is IERC721Receiver {
         uint64 nonce;
         EnumerableSet.UintSet durationList;
     }
-    event MintWNft(address opreator,address to,uint256 oid,uint256 tokenId);
 
     event MetadataUpdate(uint256 tokenId);
 
@@ -30,7 +28,7 @@ interface IBaseDoNFT is IERC721Receiver {
 
     function isWrap() external pure returns(bool);
 
-    function mintWNft(uint256 oid) external returns(uint256 tid);
+    function mintXNft(uint256 oid) external returns(uint256 tid);
 
     function mint(uint256 tokenId,uint256 durationId,uint64 start,uint64 end,address to) external returns(uint256 tid);
 
@@ -46,15 +44,23 @@ interface IBaseDoNFT is IERC721Receiver {
 
     function getDuration(uint256 durationId) external view returns(uint64 start, uint64 end);
 
-    function getDuration(uint256 tokenId,uint256 index) external view returns(uint256 durationId,uint64 start, uint64 end);
+    function getDurationByIndex(uint256 tokenId,uint256 index) external view returns(uint256 durationId,uint64 start, uint64 end);
 
-    function getWNftId(uint256 originalNftId) external view returns(uint256);
+    function getXNftId(uint256 originalNftId) external view returns(uint256);
+
+    function isXNft(uint256 tokenId) external view returns(bool);
 
     function isValidNow(uint256 tokenId) external view returns(bool isValid);
 
-    function getOrignalNftAddress() external view returns(address);
+    function getOriginalNftAddress() external view returns(address);
+
+    function getOriginalNftId(uint256 tokenId) external view returns(uint256);
 
     function checkIn(address to,uint256 tokenId,uint256 durationId) external;
+
+    function getUser(uint256 orignalNftId) external returns(address);
+
+    function exists(uint256 tokenId) external view returns (bool);
 
     
 }
