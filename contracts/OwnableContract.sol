@@ -10,11 +10,10 @@ contract OwnableContract {
     event NewOwner(address oldOwner, address newOwner);
     event NewPendingOwner(address oldPendingOwner, address newPendingOwner);
 
-    constructor(){
+    function initOwnableContract() internal{
         owner = msg.sender;
         admin = msg.sender;
     }
-
 
     modifier onlyOwner {
         require(msg.sender == owner,"onlyOwner");
