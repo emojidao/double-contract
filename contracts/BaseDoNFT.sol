@@ -11,7 +11,7 @@ abstract contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721Enumerable,
     address internal oNftAddress;
     uint256 public curDoid;
     uint256 public curDurationId;
-    uint64 private maxDuration = 31526000;
+    uint64 private maxDuration = 31536000;
     mapping(uint256 => DoNftInfo) internal doNftMapping;
     mapping(uint256 => Duration) internal durationMapping;
     mapping(uint256 => uint256) internal oid2xid;
@@ -140,13 +140,15 @@ abstract contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721Enumerable,
                 _burn(tokenId);
             }
         } else {
-            if (start > block.timestamp && start > duration.start + 1) {
-                newDuration(tokenId, duration.start, start-1);
-            }
-            if (duration.end > end + 1) {
+            if(start == duration.start && end != duration.end){
                 duration.start = end + 1;
-            }else{
+            }else if(start != duration.start && end == duration.end){
                 duration.end = start - 1;
+            }else{
+                if (start > block.timestamp) {
+                    newDuration(tokenId, duration.start, start-1);
+                }
+                duration.start = end + 1;
             }
 
             tid = mintDoNft(to, info.oid,start,end);
@@ -208,6 +210,11 @@ abstract contract BaseDoNFT is OwnableContract,ReentrancyGuard,ERC721Enumerable,
             targetDuration.end = duration.end;
             _burnDuration(tokenId,durationId);
         }
+
+        if(doNftMapping[tokenId].durationList.length() == 0){
+            _burn(tokenId);
+        }
+
     }
 
     function _burnDuration(uint256 tokenId,uint256 durationId) private{
