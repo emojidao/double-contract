@@ -16,6 +16,10 @@ contract Market is OwnableContract,MarketReentrancyGuard,Initializable,IMarket{
     uint64 public version;
     bool public isPausing;
 
+    constructor(){
+        initialize();
+    }
+
     modifier onlyApprovedOrOwner(address spender,address nftAddress,uint256 tokenId) {
         address owner = ERC721(nftAddress).ownerOf(tokenId);
         require(owner != address(0),"ERC721: operator query for nonexistent token");
@@ -146,7 +150,7 @@ contract Market is OwnableContract,MarketReentrancyGuard,Initializable,IMarket{
         beneficiary = beneficiary_;
     }
 
-    function claimFee() public whenNotPaused{
+    function claimFee() public whenNotPaused nonReentrant{
         require(msg.sender==beneficiary,"not beneficiary");
         beneficiary.transfer(balanceOfFee);
         balanceOfFee = 0;
@@ -161,7 +165,7 @@ contract Market is OwnableContract,MarketReentrancyGuard,Initializable,IMarket{
         royaltyMap[nftAddress].beneficiary = beneficiary_;
     }
 
-    function claimRoyalty(address nftAddress) public whenNotPaused{
+    function claimRoyalty(address nftAddress) public whenNotPaused nonReentrant{
         require(msg.sender==royaltyMap[nftAddress].beneficiary,"not beneficiary");
         royaltyMap[nftAddress].beneficiary.transfer(royaltyMap[nftAddress].balance);
         royaltyMap[nftAddress].balance = 0;
