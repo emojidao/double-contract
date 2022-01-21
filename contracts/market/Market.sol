@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "./IMarket.sol";
 import "../OwnableContract.sol";
 import "../IBaseDoNFT.sol";
 import "./MarketReentrancyGuard.sol";
-contract Market is OwnableContract,MarketReentrancyGuard,Initializable,IMarket{
+contract Market is OwnableContract,MarketReentrancyGuard,IMarket{
     uint64 constant private E5 = 1e5;
     mapping(address=>Credit) internal creditMap;
     mapping(address=>Royalty) internal royaltyMap;
@@ -17,7 +16,9 @@ contract Market is OwnableContract,MarketReentrancyGuard,Initializable,IMarket{
     bool public isPausing;
 
     constructor(){
-        initialize();
+        version = 1;
+        initReentrancyGuard();
+        initOwnableContract();
     }
 
     modifier onlyApprovedOrOwner(address spender,address nftAddress,uint256 tokenId) {
@@ -30,12 +31,6 @@ contract Market is OwnableContract,MarketReentrancyGuard,Initializable,IMarket{
     modifier whenNotPaused(){
         require(!isPausing,"is pausing");
         _;
-    }
-
-    function initialize() public initializer {
-        version = 1;
-        initReentrancyGuard();
-        initOwnableContract();
     }
 
     function mintAndCreateLendOrder (
