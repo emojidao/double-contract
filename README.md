@@ -11,9 +11,12 @@ No Collateral Requirement: Unlike other centralized NFT rental services requirin
 
 Sublet Function: Planning to lease your NFTs? We have got you covered with our unique doNFT model that allows users to sublet their NFT(s) with ease within or outside of the rental period. 
 
-Website: https://double.one/ 
+Website: https://double.one
+
 Twitter: https://twitter.com/DoubleProtocol
+
 Community: https://discord.gg/8MNtaMEENf
+
 Documentation:https://app.gitbook.com/s/UIxGyzFg46yridrhqWLS/concepts
 
 ![avatar](./Overview.png)
