@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import "./BaseDoNFT.sol";
 
-contract VirtualDoNFT is BaseDoNFT{
+abstract contract VirtualDoNFT is BaseDoNFT{
 
     function mintXNft(uint256 oid) public nonReentrant override virtual returns(uint256 tid) {
         require(oid2xid[oid] == 0, "already warped");
-        require(onlyApprovedOrOwner(tx.origin,oNftAddress,oid) || onlyApprovedOrOwner(msg.sender,oNftAddress,oid),"only approved or owner");
+        require(onlyApprovedOrOwner(msg.sender,oNftAddress,oid),"only approved or owner");
         tid = mintDoNft(address(this),oid,uint64(block.timestamp),type(uint64).max);
         oid2xid[oid] = tid;
     }
@@ -44,7 +44,7 @@ contract VirtualDoNFT is BaseDoNFT{
         uint256 tokenId
     ) internal override virtual {
         require(!isXNft(tokenId),"cannot transfer wNft");
-        ERC721._transfer(from, to, tokenId);
+        super._transfer(from, to, tokenId);
     }
 
 

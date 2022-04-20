@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
@@ -22,9 +22,7 @@ interface IBaseDoNFT is IERC721Receiver {
 
     event DurationBurn(uint256[] durationIdList);
 
-    event CheckIn(address opreator,address to,uint256 tokenId,uint256 durationId);
-
-    function init(address address_,string memory name_, string memory symbol_) external;
+    event CheckIn(address opreator,address to,uint256 tokenId,uint256 durationId,uint256 oid,uint64 expires);
 
     function isWrap() external pure returns(bool);
 
@@ -33,6 +31,8 @@ interface IBaseDoNFT is IERC721Receiver {
     function mint(uint256 tokenId,uint256 durationId,uint64 start,uint64 end,address to) external returns(uint256 tid);
 
     function setMaxDuration(uint64 v) external;
+
+    function getMaxDuration() external view returns(uint64);
 
     function getDurationIdList(uint256 tokenId) external view returns(uint256[] memory);
 
@@ -58,7 +58,7 @@ interface IBaseDoNFT is IERC721Receiver {
 
     function checkIn(address to,uint256 tokenId,uint256 durationId) external;
 
-    function getUser(uint256 orignalNftId) external returns(address);
+    function getUser(uint256 orignalNftId) external view returns(address);
 
     function exists(uint256 tokenId) external view returns (bool);
 

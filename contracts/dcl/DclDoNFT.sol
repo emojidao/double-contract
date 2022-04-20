@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
-import "../WrapDoNFT.sol";
-import "../BaseDoNFT.sol";
+import "../VipDoNFT.sol";
 import "./IDCL.sol";
+import "./DCL.sol";
 
-contract DclDoNFT is WrapDoNFT{
-    using EnumerableSet for EnumerableSet.UintSet;
-    constructor(address address_,string memory name_, string memory symbol_) {
-        super.init(address_, name_, symbol_);
-    }
-    
-    function checkIn(address to,uint256 tokenId,uint256 durationId) public override virtual{
-        BaseDoNFT.checkIn(to,tokenId,durationId);
-        DoNftInfo storage info = doNftMapping[tokenId];
-        IDCL(oNftAddress).setUpdateOperator(info.oid, to);
+contract DclDoNFT is VipDoNFT{
+
+    function getUser(uint256 originalNftId) public virtual override view returns(address){
+        return DCL(oNftAddress).updateOperator(originalNftId);
     }
 
-    
+    function setUser(uint256 oid,address to,uint64 expiredAt) internal virtual override {
+        super.setUser(oid,to,expiredAt);
+        IDCL(oNftAddress).setUpdateOperator(oid,to);
+    }
 
 }

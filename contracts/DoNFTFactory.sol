@@ -1,66 +1,48 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import "./OwnableContract.sol";
-import "./IBaseDoNFT.sol";
+import "./IComplexDoNFT.sol";
+import "./dualRoles/wrap/WrapERC721DualRole.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
+import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract DoNFTFactory is OwnableContract{
-    /**nftAddress => (gameKey => doNFT) */
-    mapping(address => mapping(string => address)) virtualDoNftMap;
-    mapping(address => mapping(string => address)) wrapDoNftMap;
-    mapping(address => address) doNftToNft;
-    address private virtualDoNftImplementation;
-    address private wrapDoNftImplementation;
+
+    event DeployDoNFT(address proxy,string name, string symbol,address originalAddress,address market,address tempRoyaltyAdmin,string gameKey);
+
+    event DeployWrapERC721DualRole(address wrapNFT,string name, string symbol,address originalAddress);
+
+    mapping(address => mapping(string => address)) private wrapDoNftMap;
+
+    address public beacon;
 
     constructor(){
         initOwnableContract();
     }
 
-    function createVirtualDoNFT(address nftAddress,string calldata gameKey,string calldata name, string calldata symbol) external returns(address) {
-        require(IERC165(nftAddress).supportsInterface(type(IERC721).interfaceId),"no 721");
-        require(virtualDoNftMap[nftAddress][gameKey] == address(0),"already create");
-        address clone = Clones.clone(virtualDoNftImplementation);
-        IBaseDoNFT(clone).init(nftAddress,name, symbol);
-        virtualDoNftMap[nftAddress][gameKey] = clone;
-        doNftToNft[clone] = nftAddress;
-        return clone;
+    function deployWrapDoNFT(string memory name, string memory symbol,address originalAddress,address market,address tempRoyaltyAdmin,string calldata gameKey) external returns(BeaconProxy proxy) {
+        require(IERC165(originalAddress).supportsInterface(type(IERC721).interfaceId),"not ERC721");
+        require(wrapDoNftMap[originalAddress][gameKey] == address(0),"already create");
+        bytes memory _data = abi.encodeWithSignature("initialize(string,string,address,address,address)",name,symbol,originalAddress,market,tempRoyaltyAdmin);
+        proxy = new BeaconProxy(beacon,_data);
+        wrapDoNftMap[originalAddress][gameKey] = address(proxy);
+        emit DeployDoNFT(address(proxy),name,symbol,originalAddress,market,tempRoyaltyAdmin,gameKey);
     }
 
-    function createWrapDoNFT(address nftAddress,string calldata gameKey,string calldata name, string calldata symbol) external returns(address) {
-        require(IERC165(nftAddress).supportsInterface(type(IERC721).interfaceId),"no 721");
-        require(wrapDoNftMap[nftAddress][gameKey] == address(0),"already create");
-        address clone = Clones.clone(wrapDoNftImplementation);
-        IBaseDoNFT(clone).init(nftAddress,name, symbol);
-        wrapDoNftMap[nftAddress][gameKey] = clone;
-        doNftToNft[clone] = nftAddress;
-        return clone;
+    function deployWrapERC721DualRole(string memory name, string memory symbol,address originalAddress) public returns(WrapERC721DualRole wrapNFT){
+        require(IERC165(originalAddress).supportsInterface(type(IERC721).interfaceId),"not ERC721");
+        wrapNFT = new WrapERC721DualRole(name,symbol,originalAddress);
+        emit DeployWrapERC721DualRole(address(wrapNFT),name,symbol,originalAddress);
     }
 
-    function setWrapDoNftImplementation(address imp) public onlyAdmin {
-        wrapDoNftImplementation = imp;
+    function setBeacon(address beacon_) public onlyAdmin {
+        beacon = beacon_;
     }
 
-    function setVirtualDoNftImplementation(address imp) public onlyAdmin {
-        virtualDoNftImplementation = imp;
-    }
-
-    function getWrapDoNftImplementation() public view returns(address){
-        return wrapDoNftImplementation;
-    }
-
-    function getVirtualDoNftImplementation() public view returns(address) {
-        return virtualDoNftImplementation;
-    }
-
-    function getWrapDoNftImplementation(address nftAddress,string calldata gameKey) public view returns(address){
+    function getWrapProxy(address nftAddress,string calldata gameKey) public view returns(address){
         return wrapDoNftMap[nftAddress][gameKey];
     }
-
-    function getVirtualDoNftImplementation(address nftAddress,string calldata gameKey) public view returns(address){
-        return virtualDoNftMap[nftAddress][gameKey];
-    }
-
 
 }
