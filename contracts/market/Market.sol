@@ -23,9 +23,9 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
     bool public isPausing;
     bool public supportERC20;
 
-    function initialize() public initializer {
+    function initialize(address owner_, address admin_) public initializer {
         __ReentrancyGuard_init();
-        initOwnableContract();
+        initOwnableContract(owner_, admin_);
         maxIndate = 365 days;
         fee = 2500;
     }
@@ -57,7 +57,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
         uint256 pricePerDay,
         address paymentToken
     ) public nonReentrant {
-        uint256 nftId = _mintX(doNftAddress, oNftId, maxEndTime);
+        uint256 nftId = _mintV(doNftAddress, oNftId, maxEndTime);
         createLendOrder(
             doNftAddress,
             nftId,
@@ -75,9 +75,10 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
         uint64 minDuration,
         uint256 pricePerDay,
         address paymentToken,
-        address renter
+        address renter,
+        OrderType orderType
     ) public nonReentrant {
-        uint256 nftId = _mintX(doNftAddress, oNftId, maxEndTime);
+        uint256 nftId = _mintV(doNftAddress, oNftId, maxEndTime);
         createPrivateLendOrder(
             doNftAddress,
             nftId,
@@ -85,11 +86,12 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             minDuration,
             pricePerDay,
             paymentToken,
-            renter
+            renter,
+            orderType
         );
     }
 
-    function _mintX(
+    function _mintV(
         address doNftAddress,
         uint256 oNftId,
         uint64 maxEndTime
@@ -111,7 +113,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             onlyApprovedOrOwner(msg.sender, oNftAddress, oNftId);
         }
         require(maxEndTime > block.timestamp, "invalid maxEndTime");
-        nftId = IComplexDoNFT(doNftAddress).mintXNft(oNftId);
+        nftId = IComplexDoNFT(doNftAddress).mintVNft(oNftId);
     }
 
     function createLendOrder(
@@ -147,9 +149,9 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
         uint64 minDuration,
         uint256 pricePerDay,
         address paymentToken,
-        address renter
+        address renter,
+        OrderType orderType
     ) public whenNotPaused {
-        require(renter != address(0), "Error:renter cannot be  address(0)");
         privateOrderMap[nftAddress][nftId] = renter;
         paymentNormalMap[nftAddress][nftId] = PaymentNormal(
             paymentToken,
@@ -162,7 +164,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             minDuration,
             pricePerDay,
             paymentToken,
-            OrderType.Private,
+            orderType,
             PaymentType.Normal,
             renter
         );
@@ -222,7 +224,8 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             minDuration,
             pricePerDay,
             paymentToken,
-            renter
+            renter,
+            orderType
         );
     }
 
@@ -294,6 +297,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             durationId,
             startTime,
             endTime,
+            msg.sender,
             user
         );
         PaymentNormal storage pNormal = paymentNormalMap[nftAddress][nftId];

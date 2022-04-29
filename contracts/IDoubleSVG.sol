@@ -10,6 +10,4 @@ interface IDoubleSVG {
         uint64 start_time,
         uint64 end_time
     ) external view returns (string memory);
-
-    
 }

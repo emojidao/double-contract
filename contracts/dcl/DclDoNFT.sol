@@ -5,15 +5,23 @@ import "../VipDoNFT.sol";
 import "./IDCL.sol";
 import "./DCL.sol";
 
-contract DclDoNFT is VipDoNFT{
-
-    function getUser(uint256 originalNftId) public virtual override view returns(address){
+contract DclDoNFT is VipDoNFT {
+    function getUser(uint256 originalNftId)
+        public
+        view
+        virtual
+        override
+        returns (address)
+    {
         return DCL(oNftAddress).updateOperator(originalNftId);
     }
 
-    function setUser(uint256 oid,address to,uint64 expiredAt) internal virtual override {
-        super.setUser(oid,to,expiredAt);
-        IDCL(oNftAddress).setUpdateOperator(oid,to);
+    function setUser(
+        uint256 oid,
+        address to,
+        uint64 expiredAt
+    ) internal virtual override {
+        super.setUser(oid, to, expiredAt);
+        IDCL(oNftAddress).setUpdateOperator(oid, to);
     }
-
 }

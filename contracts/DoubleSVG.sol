@@ -189,7 +189,7 @@ library DoubleSVG {
             nameColor = "#b25600";
         }
         string memory endTimeStr = "Infinity";
-        if(end < type(uint64).max){
+        if (end < type(uint64).max) {
             endTimeStr = formatDate(end);
         }
         return
@@ -210,7 +210,11 @@ library DoubleSVG {
             );
     }
 
-    function formatDate(uint256 timestamp) internal pure returns (string memory) {
+    function formatDate(uint256 timestamp)
+        internal
+        pure
+        returns (string memory)
+    {
         (
             uint256 year,
             uint256 month,
@@ -263,9 +267,11 @@ library DoubleSVG {
         string memory type_value,
         uint64 start_time,
         uint64 end_time
-    ) public view returns (string memory){
-        string memory image = encode(bytes(generateImage(start_time,end_time,name)));
-        name = string(abi.encodePacked(name," #",toString(tokenId)));
+    ) public view returns (string memory) {
+        string memory image = encode(
+            bytes(generateImage(start_time, end_time, name))
+        );
+        name = string(abi.encodePacked(name, " #", toString(tokenId)));
 
         return
             string(
@@ -284,7 +290,7 @@ library DoubleSVG {
                                 '"},{"display_type":"date","trait_type":"start_time","value":"',
                                 toString(start_time),
                                 configTime(end_time),
-                                '}]}'
+                                "}]}"
                             )
                         )
                     )
@@ -292,11 +298,23 @@ library DoubleSVG {
             );
     }
 
-    function configTime(uint64 time) internal pure returns (string memory){
-        if(time == type(uint64).max){
-            return string(abi.encodePacked('"},{"trait_type":"end_time","value":"Infinity"')) ;
-        }else{
-            return string(abi.encodePacked('"},{"display_type":"date","trait_type":"end_time","value":"',toString(time),'"'));
+    function configTime(uint64 time) internal pure returns (string memory) {
+        if (time == type(uint64).max) {
+            return
+                string(
+                    abi.encodePacked(
+                        '"},{"trait_type":"end_time","value":"Infinity"'
+                    )
+                );
+        } else {
+            return
+                string(
+                    abi.encodePacked(
+                        '"},{"display_type":"date","trait_type":"end_time","value":"',
+                        toString(time),
+                        '"'
+                    )
+                );
         }
     }
 }

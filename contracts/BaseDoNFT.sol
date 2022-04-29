@@ -22,18 +22,20 @@ abstract contract BaseDoNFT is
     uint64 public maxDuration;
     mapping(uint256 => DoNftInfo) internal doNftMapping;
     mapping(uint256 => Duration) internal durationMapping;
-    mapping(uint256 => uint256) internal oid2xid;
+    mapping(uint256 => uint256) internal oid2vid;
     bool private isOnlyNow;
 
     function _BaseDoNFT_init(
         string memory name_,
         string memory symbol_,
         address address_,
-        address market_
+        address market_,
+        address owner_,
+        address admin_
     ) internal onlyInitializing {
         __ERC721_init(name_, symbol_);
         __ReentrancyGuard_init();
-        initOwnableContract();
+        initOwnableContract(owner_, admin_);
         oNftAddress = address_;
         market = market_;
         isOnlyNow = true;
@@ -164,7 +166,8 @@ abstract contract BaseDoNFT is
         uint256 durationId,
         uint64 start,
         uint64 end,
-        address to
+        address to,
+        address user
     ) public onlyNow(start) nonReentrant returns (uint256 tid) {
         if (start < block.timestamp) {
             start = uint64(block.timestamp);
@@ -209,7 +212,7 @@ abstract contract BaseDoNFT is
         }
 
         if (start == block.timestamp) {
-            checkIn(to, tid, tDurationId);
+            checkIn(user, tid, tDurationId);
         }
         emit MetadataUpdate(tokenId);
     }
@@ -300,7 +303,7 @@ abstract contract BaseDoNFT is
         emit DurationBurn(arr);
     }
 
-    function _burnXNft(uint256 wid) internal {
+    function _burnVNft(uint256 wid) internal {
         DoNftInfo storage info = doNftMapping[wid];
         uint256 length = info.durationList.length();
         for (uint256 index = 0; index < length; index++) {
@@ -308,7 +311,7 @@ abstract contract BaseDoNFT is
         }
         emit DurationBurn(info.durationList.values());
         delete info.durationList;
-        delete oid2xid[info.oid];
+        delete oid2vid[info.oid];
         _burn(wid);
     }
 
@@ -356,7 +359,7 @@ abstract contract BaseDoNFT is
         }
 
         if (info.durationList.length() == 0) {
-            require(!isXNft(tokenId), "can not burn xNFT");
+            require(!isVNft(tokenId), "can not burn vNFT");
             _burn(tokenId);
         }
     }
@@ -378,14 +381,10 @@ abstract contract BaseDoNFT is
         );
     }
 
-    function isXNft(uint256 tokenId) public view returns (bool) {
+    function isVNft(uint256 tokenId) public view returns (bool) {
         if (tokenId == 0) return false;
 
-        return oid2xid[doNftMapping[tokenId].oid] == tokenId;
-    }
-
-    function isWrap() public pure virtual returns (bool) {
-        return false;
+        return oid2vid[doNftMapping[tokenId].oid] == tokenId;
     }
 
     function getOriginalNftAddress() external view returns (address) {
@@ -397,8 +396,8 @@ abstract contract BaseDoNFT is
         return info.oid;
     }
 
-    function getXNftId(uint256 originalNftId) public view returns (uint256) {
-        return oid2xid[originalNftId];
+    function getVNftId(uint256 originalNftId) public view returns (uint256) {
+        return oid2vid[originalNftId];
     }
 
     function onERC721Received(

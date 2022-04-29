@@ -3,8 +3,9 @@ pragma solidity >=0.6.6 <0.9.0;
 
 interface IMarket {
     enum OrderType {
-        Public,  // 0
-        Private  // 1
+        Public, // 0
+        Private, // 1
+        Event_Private //2
     }
 
     enum PaymentType {
@@ -36,7 +37,8 @@ interface IMarket {
         uint64 minDuration,
         uint256 pricePerDay,
         address paymentToken,
-        address renter
+        address renter,
+        OrderType orderType
     );
     event CancelLendOrder(address lender, address nftAddress, uint256 nftId);
     event FulfillOrder(
@@ -90,7 +92,7 @@ interface IMarket {
 
     function fulfillOrderNow(
         address nftAddress,
-        uint256 tokenId,
+        uint256 nftId,
         uint256 durationId,
         uint64 duration,
         address user
@@ -104,7 +106,8 @@ interface IMarket {
 
     function claimFee(address[] calldata paymentTokens) external;
 
-    function claimRoyalty(address nftAddress, address[] calldata paymentTokens) external;
+    function claimRoyalty(address nftAddress, address[] calldata paymentTokens)
+        external;
 
     function isLendOrderValid(address nftAddress, uint256 nftId)
         external

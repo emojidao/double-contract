@@ -21,13 +21,12 @@ library Strings {
         uint256 index = digits - 1;
         temp = value;
         while (temp != 0) {
-            buffer[index--] = bytes1(uint8(48 + temp % 10));
+            buffer[index--] = bytes1(uint8(48 + (temp % 10)));
             temp /= 10;
         }
         return string(buffer);
     }
 }
-
 
 /*
  *  TimeLockMultiSigWallet: Allows multiple parties to agree on transactions before execution with time lock.
@@ -35,43 +34,42 @@ library Strings {
  *  Reference 2: https://github.com/compound-finance/compound-protocol/blob/master/contracts/Timelock.sol
  */
 contract TimeLockMultiSigWallet {
-
     using Strings for uint256;
 
     /*
      *  Events
      */
-    event Confirmation(address indexed sender, uint indexed transactionId);
-    event Revocation(address indexed sender, uint indexed transactionId);
-    event Submission(uint indexed transactionId);
-    event Execution(uint indexed transactionId);
-    event ExecutionFailure(uint indexed transactionId);
-    event Deposit(address indexed sender, uint value);
+    event Confirmation(address indexed sender, uint256 indexed transactionId);
+    event Revocation(address indexed sender, uint256 indexed transactionId);
+    event Submission(uint256 indexed transactionId);
+    event Execution(uint256 indexed transactionId);
+    event ExecutionFailure(uint256 indexed transactionId);
+    event Deposit(address indexed sender, uint256 value);
     event OwnerAddition(address indexed owner);
     event OwnerRemoval(address indexed owner);
-    event RequirementChange(uint required);
-    event NewDelay(uint delay);
+    event RequirementChange(uint256 required);
+    event NewDelay(uint256 delay);
 
-    uint public constant VERSION = 20210812;
-    uint public constant MINIMUM_DELAY = 1;
-    uint public constant MAXIMUM_DELAY = 15 days;
-    uint public delay; // delay time
+    uint256 public constant VERSION = 20210812;
+    uint256 public constant MINIMUM_DELAY = 1;
+    uint256 public constant MAXIMUM_DELAY = 15 days;
+    uint256 public delay; // delay time
 
-    uint constant public MAX_OWNER_COUNT = 50;
+    uint256 public constant MAX_OWNER_COUNT = 50;
 
-    mapping (uint => Transaction) public transactions;
-    mapping (uint => mapping (address => bool)) public confirmations;
-    mapping (address => bool) public isOwner;
+    mapping(uint256 => Transaction) public transactions;
+    mapping(uint256 => mapping(address => bool)) public confirmations;
+    mapping(address => bool) public isOwner;
     address[] public owners;
-    uint public required;
-    uint public transactionCount;
+    uint256 public required;
+    uint256 public transactionCount;
 
     struct Transaction {
         address destination;
-        uint value;
+        uint256 value;
         bytes data;
         bool executed;
-        uint submitTime;
+        uint256 submitTime;
     }
 
     /*
@@ -88,50 +86,54 @@ contract TimeLockMultiSigWallet {
     }
 
     modifier ownerExists(address owner) {
-        require(isOwner[owner],"is not owner");
+        require(isOwner[owner], "is not owner");
         _;
     }
 
-    modifier transactionExists(uint transactionId) {
-        require(transactions[transactionId].destination != address(0),"transactionId is not exists");
+    modifier transactionExists(uint256 transactionId) {
+        require(
+            transactions[transactionId].destination != address(0),
+            "transactionId is not exists"
+        );
         _;
     }
 
-    modifier confirmed(uint transactionId, address owner) {
-        require(confirmations[transactionId][owner],"is not confirmed");
+    modifier confirmed(uint256 transactionId, address owner) {
+        require(confirmations[transactionId][owner], "is not confirmed");
         _;
     }
 
-    modifier notConfirmed(uint transactionId, address owner) {
-        require(!confirmations[transactionId][owner],"already confirmed");
+    modifier notConfirmed(uint256 transactionId, address owner) {
+        require(!confirmations[transactionId][owner], "already confirmed");
         _;
     }
 
-    modifier notExecuted(uint transactionId) {
-        require(!transactions[transactionId].executed,"already executed");
+    modifier notExecuted(uint256 transactionId) {
+        require(!transactions[transactionId].executed, "already executed");
         _;
     }
 
     modifier notNull(address _address) {
-        require(_address != address(0),"_address == address(0)");
+        require(_address != address(0), "_address == address(0)");
         _;
     }
 
-    modifier validRequirement(uint ownerCount, uint _required) {
-        require(ownerCount <= MAX_OWNER_COUNT
-            && _required <= ownerCount
-            && _required != 0
-            && ownerCount != 0,"error: validRequirement()");
+    modifier validRequirement(uint256 ownerCount, uint256 _required) {
+        require(
+            ownerCount <= MAX_OWNER_COUNT &&
+                _required <= ownerCount &&
+                _required != 0 &&
+                ownerCount != 0,
+            "error: validRequirement()"
+        );
         _;
     }
 
     /// @dev Fallback function allows to deposit ether.
-    fallback() external {
-    }
+    fallback() external {}
 
-    receive() external payable { 
-        if (msg.value > 0)
-            emit Deposit(msg.sender, msg.value);
+    receive() external payable {
+        if (msg.value > 0) emit Deposit(msg.sender, msg.value);
     }
 
     /*
@@ -140,14 +142,18 @@ contract TimeLockMultiSigWallet {
     /// @dev Contract constructor sets initial owners and required number of confirmations.
     /// @param _owners List of initial owners.
     /// @param _required Number of required confirmations.
-    constructor(address[] memory _owners, uint _required, uint _delay)
-        public
-        validRequirement(_owners.length, _required)
-    {
+    constructor(
+        address[] memory _owners,
+        uint256 _required,
+        uint256 _delay
+    ) public validRequirement(_owners.length, _required) {
         require(_delay >= MINIMUM_DELAY, "Delay must exceed minimum delay.");
-        require(_delay <= MAXIMUM_DELAY, "Delay must not exceed maximum delay.");
+        require(
+            _delay <= MAXIMUM_DELAY,
+            "Delay must not exceed maximum delay."
+        );
 
-        for (uint i=0; i<_owners.length; i++) {
+        for (uint256 i = 0; i < _owners.length; i++) {
             require(!isOwner[_owners[i]] && _owners[i] != address(0));
             isOwner[_owners[i]] = true;
         }
@@ -172,13 +178,9 @@ contract TimeLockMultiSigWallet {
 
     /// @dev Allows to remove an owner. Transaction has to be sent by wallet.
     /// @param owner Address of owner.
-    function removeOwner(address owner)
-        public
-        onlyWallet
-        ownerExists(owner)
-    {
+    function removeOwner(address owner) public onlyWallet ownerExists(owner) {
         isOwner[owner] = false;
-        for (uint i=0; i<owners.length - 1; i++)
+        for (uint256 i = 0; i < owners.length - 1; i++)
             if (owners[i] == owner) {
                 owners[i] = owners[owners.length - 1];
                 break;
@@ -197,7 +199,7 @@ contract TimeLockMultiSigWallet {
         ownerExists(owner)
         ownerDoesNotExist(newOwner)
     {
-        for (uint i=0; i<owners.length; i++)
+        for (uint256 i = 0; i < owners.length; i++)
             if (owners[i] == owner) {
                 owners[i] = newOwner;
                 break;
@@ -210,7 +212,7 @@ contract TimeLockMultiSigWallet {
 
     /// @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet.
     /// @param _required Number of required confirmations.
-    function changeRequirement(uint _required)
+    function changeRequirement(uint256 _required)
         public
         onlyWallet
         validRequirement(owners.length, _required)
@@ -224,27 +226,29 @@ contract TimeLockMultiSigWallet {
     @param value Transaction ether value.
     @param data Transaction data payload.
     @return Returns transaction ID.*/
-    function submitTransaction(address destination, uint value, bytes memory data)
-        public
-        returns (uint transactionId)
-    {
+    function submitTransaction(
+        address destination,
+        uint256 value,
+        bytes memory data
+    ) public returns (uint256 transactionId) {
         transactionId = addTransaction(destination, value, data);
         confirmTransaction(transactionId);
     }
 
     /// @dev Allows an owner to batch confirm  transactions.
     /// @param transactionIdArray Transaction ID array.
-    function batchConfirmTransaction(uint[] memory transactionIdArray) public
+    function batchConfirmTransaction(uint256[] memory transactionIdArray)
+        public
     {
-        for(uint i = 0; i < transactionIdArray.length; i++ ) {
+        for (uint256 i = 0; i < transactionIdArray.length; i++) {
             confirmTransaction(transactionIdArray[i]);
         }
     }
-    
+
     /// @dev Allows an owner to confirm a transaction.
     /// @param transactionId Transaction ID.
-    function confirmTransaction(uint transactionId) 
-        public 
+    function confirmTransaction(uint256 transactionId)
+        public
         ownerExists(msg.sender)
         transactionExists(transactionId)
         notConfirmed(transactionId, msg.sender)
@@ -255,7 +259,7 @@ contract TimeLockMultiSigWallet {
 
     /// @dev Allows an owner to revoke a confirmation for a transaction.
     /// @param transactionId Transaction ID.
-    function revokeConfirmation(uint transactionId)
+    function revokeConfirmation(uint256 transactionId)
         public
         ownerExists(msg.sender)
         confirmed(transactionId, msg.sender)
@@ -267,33 +271,49 @@ contract TimeLockMultiSigWallet {
 
     /// @dev Allows an owner to batch execute  transactions.
     /// @param transactionIdArray Transaction ID array.
-    function batchExecuteTransaction(uint[] memory transactionIdArray) public
+    function batchExecuteTransaction(uint256[] memory transactionIdArray)
+        public
     {
-        for(uint i = 0; i < transactionIdArray.length; i++ ) {
+        for (uint256 i = 0; i < transactionIdArray.length; i++) {
             executeTransaction(transactionIdArray[i]);
         }
     }
 
     /// @dev Allows anyone to execute a confirmed transaction.
     /// @param transactionId Transaction ID.
-    function executeTransaction(uint transactionId)
+    function executeTransaction(uint256 transactionId)
         public
         ownerExists(msg.sender)
         confirmed(transactionId, msg.sender)
         notExecuted(transactionId)
     {
-        require(getBlockTimestamp() >= transactions[transactionId].submitTime + delay, "The time is not up, the command cannot be executed temporarily!");
-        require(getBlockTimestamp() <= transactions[transactionId].submitTime + MAXIMUM_DELAY, "The maximum execution time has been exceeded, unable to execute!");
+        require(
+            getBlockTimestamp() >=
+                transactions[transactionId].submitTime + delay,
+            "The time is not up, the command cannot be executed temporarily!"
+        );
+        require(
+            getBlockTimestamp() <=
+                transactions[transactionId].submitTime + MAXIMUM_DELAY,
+            "The maximum execution time has been exceeded, unable to execute!"
+        );
 
         if (isConfirmed(transactionId)) {
             Transaction storage txn = transactions[transactionId];
             txn.executed = true;
             // address(txn.destination).call(abi.encodeWithSignature(txn.data))
             (bool success, ) = txn.destination.call{value: txn.value}(txn.data);
-            if (success)
-                emit Execution(transactionId);
+            if (success) emit Execution(transactionId);
             else {
-                revert(string(abi.encodePacked("The transactionId ", transactionId.toString(), " failed.")));
+                revert(
+                    string(
+                        abi.encodePacked(
+                            "The transactionId ",
+                            transactionId.toString(),
+                            " failed."
+                        )
+                    )
+                );
             }
         }
     }
@@ -301,17 +321,11 @@ contract TimeLockMultiSigWallet {
     /// @dev Returns the confirmation status of a transaction.
     /// @param transactionId Transaction ID.
     /// @return Confirmation status.
-    function isConfirmed(uint transactionId)
-        public
-        view
-        returns (bool)
-    {
-        uint count = 0;
-        for (uint i=0; i<owners.length; i++) {
-            if (confirmations[transactionId][owners[i]])
-                count += 1;
-            if (count == required)
-                return true;
+    function isConfirmed(uint256 transactionId) public view returns (bool) {
+        uint256 count = 0;
+        for (uint256 i = 0; i < owners.length; i++) {
+            if (confirmations[transactionId][owners[i]]) count += 1;
+            if (count == required) return true;
         }
         return false;
     }
@@ -324,11 +338,11 @@ contract TimeLockMultiSigWallet {
     @param value Transaction ether value.
     @param data Transaction data payload.
     @return Returns transaction ID.*/
-    function addTransaction(address destination, uint value, bytes memory data)
-        internal
-        notNull(destination)
-        returns (uint transactionId)
-    {
+    function addTransaction(
+        address destination,
+        uint256 value,
+        bytes memory data
+    ) internal notNull(destination) returns (uint256 transactionId) {
         transactionId = transactionCount;
         transactions[transactionId] = Transaction({
             destination: destination,
@@ -347,15 +361,14 @@ contract TimeLockMultiSigWallet {
     /*@dev Returns number of confirmations of a transaction.
     @param transactionId Transaction ID.
     @return Number of confirmations.*/
-    function getConfirmationCount(uint transactionId)
+    function getConfirmationCount(uint256 transactionId)
         public
         view
-        returns (uint count)
+        returns (uint256 count)
     {
         count = 0;
-        for (uint i=0; i<owners.length; i++)
-            if (confirmations[transactionId][owners[i]])
-                count += 1;
+        for (uint256 i = 0; i < owners.length; i++)
+            if (confirmations[transactionId][owners[i]]) count += 1;
     }
 
     /*@dev Returns total number of transactions after filers are applied.
@@ -365,44 +378,40 @@ contract TimeLockMultiSigWallet {
     function getTransactionCount(bool pending, bool executed)
         public
         view
-        returns (uint count)
+        returns (uint256 count)
     {
         count = 0;
-        for (uint i=0; i<transactionCount; i++)
-            if (   pending && !transactions[i].executed
-                || executed && transactions[i].executed)
-                count += 1;
+        for (uint256 i = 0; i < transactionCount; i++)
+            if (
+                (pending && !transactions[i].executed) ||
+                (executed && transactions[i].executed)
+            ) count += 1;
     }
 
     /// @dev Returns list of owners.
     /// @return List of owner addresses.
-    function getOwners()
-        public
-        view
-        returns (address[] memory)
-    {
+    function getOwners() public view returns (address[] memory) {
         return owners;
     }
 
     /*@dev Returns array with owner addresses, which confirmed transaction.
     @param transactionId Transaction ID.
     @return Returns array of owner addresses.*/
-    function getConfirmations(uint transactionId)
+    function getConfirmations(uint256 transactionId)
         public
         view
         returns (address[] memory _confirmations)
     {
         address[] memory confirmationsTemp = new address[](owners.length);
-        uint count = 0;
-        uint i;
-        for (i=0; i<owners.length; i++)
+        uint256 count = 0;
+        uint256 i;
+        for (i = 0; i < owners.length; i++)
             if (confirmations[transactionId][owners[i]]) {
                 confirmationsTemp[count] = owners[i];
                 count += 1;
             }
         _confirmations = new address[](count);
-        for (i=0; i<count; i++)
-            _confirmations[i] = confirmationsTemp[i];
+        for (i = 0; i < count; i++) _confirmations[i] = confirmationsTemp[i];
     }
 
     /*@dev Returns list of transaction IDs in defined range.
@@ -411,45 +420,54 @@ contract TimeLockMultiSigWallet {
     @param pending Include pending transactions.
     @param executed Include executed transactions.
     @return Returns array of transaction IDs.*/
-    function getTransactionIds(uint from, uint to, bool pending, bool executed)
-        public
-        view
-        returns (uint[] memory _transactionIds)
-    {
-        uint[] memory transactionIdsTemp = new uint[](transactionCount);
-        uint count = 0;
-        uint i;
-        for (i=0; i<transactionCount; i++)
-            if (   pending && !transactions[i].executed
-                || executed && transactions[i].executed)
-            {
+    function getTransactionIds(
+        uint256 from,
+        uint256 to,
+        bool pending,
+        bool executed
+    ) public view returns (uint256[] memory _transactionIds) {
+        uint256[] memory transactionIdsTemp = new uint256[](transactionCount);
+        uint256 count = 0;
+        uint256 i;
+        for (i = 0; i < transactionCount; i++)
+            if (
+                (pending && !transactions[i].executed) ||
+                (executed && transactions[i].executed)
+            ) {
                 transactionIdsTemp[count] = i;
                 count += 1;
             }
-        _transactionIds = new uint[](to - from);
-        for (i=from; i<to; i++)
+        _transactionIds = new uint256[](to - from);
+        for (i = from; i < to; i++)
             _transactionIds[i - from] = transactionIdsTemp[i];
     }
 
-    function getBlockTimestamp() view internal returns (uint) {
+    function getBlockTimestamp() internal view returns (uint256) {
         return block.timestamp;
     }
 
     /*@dev setDelay
     @param delay time
     */
-    function setDelay(uint _delay) public onlyWallet {
+    function setDelay(uint256 _delay) public onlyWallet {
         require(_delay >= MINIMUM_DELAY, "Delay must exceed minimum delay.");
-        require(_delay <= MAXIMUM_DELAY, "Delay must not exceed maximum delay.");
-        
+        require(
+            _delay <= MAXIMUM_DELAY,
+            "Delay must not exceed maximum delay."
+        );
+
         delay = _delay;
 
         emit NewDelay(delay);
     }
 
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external returns (bytes4){
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
         bytes4 received = 0x150b7a02;
         return received;
     }
-    
 }

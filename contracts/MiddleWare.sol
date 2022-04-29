@@ -9,20 +9,21 @@ interface IDoNFT is IComplexDoNFT, IERC721Metadata {}
 
 contract MiddleWare {
     struct DoNftMarketInfo {
-        uint256 originalNftId; // 0
-        uint256 orderPricePerDay; // 1
-        uint64 startTime; // 2
-        uint64 endTime; // 3
-        uint64 orderCreateTime; // 4
-        uint64 orderMinDuration; // 5
-        uint64 orderMaxEndTime; // 6
-        uint64 orderFee; // 7 ,  ratio = fee / 1e5 , orderFee = 1000 means 1%
-        address originalNftAddress; // 8
-        address owner; // 9
-        address user; // 10
-        address renter; //11
-        address orderPaymentToken; // 12
-        bool orderIsValid; // 13
+        uint256 originalNftId;
+        uint128 orderPricePerDay;
+        uint64 startTime;
+        uint64 endTime;
+        uint32 orderCreateTime;
+        uint32 orderMinDuration;
+        uint32 orderMaxEndTime;
+        uint32 orderFee; //   ratio = fee / 1e5 , orderFee = 1000 means 1%
+        uint8 orderType; // 0: Public, 1: Private, 2: Event_Private
+        bool orderIsValid;
+        address originalNftAddress;
+        address owner;
+        address user;
+        address orderPrivateRenter;
+        address orderPaymentToken;
     }
 
     function getNftOwnerAndUser(
@@ -78,8 +79,8 @@ contract MiddleWare {
 
         doNftInfo.originalNftAddress = doNft.getOriginalNftAddress();
         doNftInfo.orderFee =
-            uint64(market.getFee()) +
-            uint64(doNft.getRoyaltyFee());
+            uint32(market.getFee()) +
+            uint32(doNft.getRoyaltyFee());
 
         if (doNft.exists(nftId)) {
             (
@@ -105,16 +106,18 @@ contract MiddleWare {
                     nftAddr,
                     nftId
                 );
-                if (order.orderType == IMarket.OrderType.Private) {
-                    doNftInfo.renter = market.getRenterOfPrivateLendOrder(
-                        nftAddr,
-                        nftId
-                    );
+                if (
+                    order.orderType == IMarket.OrderType.Private ||
+                    order.orderType == IMarket.OrderType.Event_Private
+                ) {
+                    doNftInfo.orderPrivateRenter = market
+                        .getRenterOfPrivateLendOrder(nftAddr, nftId);
                 }
-                doNftInfo.orderMinDuration = order.minDuration;
-                doNftInfo.orderMaxEndTime = order.maxEndTime;
-                doNftInfo.orderCreateTime = order.createTime;
-                doNftInfo.orderPricePerDay = pNormal.pricePerDay;
+                doNftInfo.orderType = uint8(order.orderType);
+                doNftInfo.orderMinDuration = uint32(order.minDuration);
+                doNftInfo.orderMaxEndTime = uint32(order.maxEndTime);
+                doNftInfo.orderCreateTime = uint32(order.createTime);
+                doNftInfo.orderPricePerDay = uint128(pNormal.pricePerDay);
                 doNftInfo.orderPaymentToken = pNormal.token;
             }
         }

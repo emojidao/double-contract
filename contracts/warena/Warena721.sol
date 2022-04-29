@@ -11,7 +11,14 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
-contract Warena721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, AccessControl, ERC721Burnable {
+contract Warena721 is
+    ERC721,
+    ERC721Enumerable,
+    ERC721URIStorage,
+    Pausable,
+    AccessControl,
+    ERC721Burnable
+{
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     using SafeMath for uint256;
@@ -21,18 +28,19 @@ contract Warena721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Acce
     IERC20 private _token;
     address private _addressReceiveTokenOpenBox;
     bool private _turnOnOpenBox = true;
-    address private constant DEFAULT_TOKEN_OPEN_BOX = 0xa9D75Cc3405F0450955050C520843f99Aff8749D;
+    address private constant DEFAULT_TOKEN_OPEN_BOX =
+        0xa9D75Cc3405F0450955050C520843f99Aff8749D;
 
     uint256 public amountRequireMint = 30000000000000000000;
-    
-    mapping(bytes32 => bool) public messageHash;
-    
-    mapping (uint256 => string) private _idTokenToHash;
 
-    mapping (string => uint256) private _hashToTokenId;
+    mapping(bytes32 => bool) public messageHash;
+
+    mapping(uint256 => string) private _idTokenToHash;
+
+    mapping(string => uint256) private _hashToTokenId;
 
     using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds; 
+    Counters.Counter private _tokenIds;
 
     string private _base721URI;
 
@@ -44,17 +52,34 @@ contract Warena721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Acce
         _addressReceiveTokenOpenBox = msg.sender;
     }
 
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual override{
-        require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
+        internal
+        virtual
+        override
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI set of nonexistent token"
+        );
         _idTokenToHash[tokenId] = _tokenURI;
         _hashToTokenId[_tokenURI] = tokenId;
     }
 
-    function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721URIStorage) returns (string memory) {
-        return "https://infura-ipfs.io/ipfs/bafkreihbegouxsgbc3pexvoplueouzoaegpqc5ariibtjqahi4bfqvjl3q";
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        return
+            "https://infura-ipfs.io/ipfs/bafkreihbegouxsgbc3pexvoplueouzoaegpqc5ariibtjqahi4bfqvjl3q";
     }
 
-    function setBase721URI(string memory newBase721Url) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBase721URI(string memory newBase721Url)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _base721URI = newBase721Url;
     }
 
@@ -78,30 +103,45 @@ contract Warena721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Acce
         _setupRole(MINTER_ROLE, newMinter);
     }
 
-    function setTokenOpenBox(address ierc20Address) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTokenOpenBox(address ierc20Address)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _token = IERC20(ierc20Address);
     }
 
-    function setTotalTokenOpenBox(uint256 amount) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTotalTokenOpenBox(uint256 amount)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         amountRequireMint = amount;
     }
 
-    function safeMint(address to, uint256 tokenId) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function safeMint(address to, uint256 tokenId)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _safeMint(to, tokenId);
     }
 
-    function setTurnOnOpenBox(bool turnOnOpenBox) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setTurnOnOpenBox(bool turnOnOpenBox)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _turnOnOpenBox = turnOnOpenBox;
     }
 
-    function getAmountRequireMint() public view returns(uint256) {
+    function getAmountRequireMint() public view returns (uint256) {
         return amountRequireMint;
     }
 
-    function setAddressReceiveTokenOpenBox(address addressReceiveTokenOpenBox) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setAddressReceiveTokenOpenBox(address addressReceiveTokenOpenBox)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         _addressReceiveTokenOpenBox = addressReceiveTokenOpenBox;
     }
-    
+
     function safeMint(
         address to,
         uint256 tokenId,
@@ -115,7 +155,7 @@ contract Warena721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Acce
         //     blockExpiry >= block.number,
         //     "signature expired"
         // );
-        
+
         // bytes32 msgHash = prepareMintHash(to, tokenId, blockExpiry);
         // require(
         //     hasRole(MINTER_ROLE ,ecrecover(msgHash, v, r, s)), "in correct signer"
@@ -130,15 +170,18 @@ contract Warena721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Acce
         // return true;
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
-        internal
-        whenNotPaused
-        override(ERC721, ERC721Enumerable)
-    {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) whenNotPaused {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+    function _burn(uint256 tokenId)
+        internal
+        override(ERC721, ERC721URIStorage)
+    {
         super._burn(tokenId);
     }
 
@@ -152,8 +195,8 @@ contract Warena721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Acce
     }
 
     function mintToken(address owner, string memory metadataURI)
-    external
-    returns (uint256)
+        external
+        returns (uint256)
     {
         // require(_turnOnOpenBox, "The Open Box Day Hasn't Come Yet");
         // require(_token.balanceOf(_msgSender())>=amountRequireMint, "Not Enough Token To Open Box");
