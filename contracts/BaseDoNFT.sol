@@ -454,4 +454,15 @@ abstract contract BaseDoNFT is
         require(id == 4 || id == 97, "only for rinkeby or bsct");
         market = _market;
     }
+
+    function multicall(bytes[] calldata data) external returns(bytes[] memory results) {
+        results = new bytes[](data.length);
+        for(uint i = 0; i < data.length; i++) {
+            (bool success, bytes memory result) = address(this).delegatecall(data[i]);
+            if(success){
+                results[i] = result;
+            }
+        }
+        return results;
+    }
 }

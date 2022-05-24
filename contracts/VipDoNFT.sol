@@ -27,6 +27,7 @@ abstract contract VipDoNFT is ComplexDoNFT, CheckInMgr {
             type(uint64).max
         );
         oid2vid[oid] = tid;
+        setUser(oid, lastOwner, type(uint64).max);
     }
 
     function checkIn(

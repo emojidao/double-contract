@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 library Strings {
@@ -146,7 +147,7 @@ contract TimeLockMultiSigWallet {
         address[] memory _owners,
         uint256 _required,
         uint256 _delay
-    ) public validRequirement(_owners.length, _required) {
+    ) validRequirement(_owners.length, _required) {
         require(_delay >= MINIMUM_DELAY, "Delay must exceed minimum delay.");
         require(
             _delay <= MAXIMUM_DELAY,

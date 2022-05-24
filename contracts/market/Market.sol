@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./IMarket.sol";
 import "../OwnableContract.sol";
@@ -341,9 +342,9 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
 
         if (pNormal.token == address(0)) {
             require(msg.value >= totalPrice, "payment is not enough");
-            payable(ERC721(nftAddress).ownerOf(nftId)).transfer(leftTotalPrice);
+            Address.sendValue(payable(ERC721(nftAddress).ownerOf(nftId)), leftTotalPrice);
             if (msg.value > totalPrice) {
-                payable(msg.sender).transfer(msg.value - totalPrice);
+                Address.sendValue(payable(msg.sender), msg.value - totalPrice);
             }
         } else {
             uint256 balance_before = IERC20(pNormal.token).balanceOf(
@@ -396,7 +397,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             uint256 balance = balanceOfFee[paymentTokens[index]];
             if (balance > 0) {
                 if (paymentTokens[index] == address(0)) {
-                    beneficiary.transfer(balance);
+                    Address.sendValue(beneficiary,balance);
                 } else {
                     SafeERC20.safeTransfer(
                         IERC20(paymentTokens[index]),
@@ -429,7 +430,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             uint256 balance = royaltyMap[nftAddress][paymentTokens[index]];
             if (balance > 0) {
                 if (paymentTokens[index] == address(0)) {
-                    _beneficiary.transfer(balance);
+                    Address.sendValue(_beneficiary,balance);
                 } else {
                     SafeERC20.safeTransfer(
                         IERC20(paymentTokens[index]),
@@ -468,5 +469,16 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
 
     function setMaxIndate(uint64 max_) public onlyAdmin {
         maxIndate = max_;
+    }
+
+    function multicall(bytes[] calldata data) external returns(bytes[] memory results) {
+        results = new bytes[](data.length);
+        for(uint i = 0; i < data.length; i++) {
+            (bool success, bytes memory result) = address(this).delegatecall(data[i]);
+            if(success){
+                results[i] = result;
+            }
+        }
+        return results;
     }
 }

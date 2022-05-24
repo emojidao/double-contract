@@ -31,11 +31,21 @@ contract DoNFTFactory is OwnableContract {
     address public beacon;
     address public market;
 
-    constructor() {
-        initOwnableContract(msg.sender, msg.sender);
+    constructor(address owner_,address admin_,address beacon_,address market_) {
+        initOwnableContract(owner_, admin_);
+        beacon = beacon_;
+        market = market_;
     }
 
-    function deployDoNFTProxy(
+    function setBeaconAndMarket(address beacon_, address market_)
+        public
+        onlyAdmin
+    {
+        beacon = beacon_;
+        market = market_;
+    }
+
+    function deployDoNFT(
         string memory name,
         string memory symbol,
         address originalAddress,
@@ -46,13 +56,13 @@ contract DoNFTFactory is OwnableContract {
     ) external returns (BeaconProxy proxy) {
         require(
             IERC165(originalAddress).supportsInterface(
-                type(IERC721).interfaceId
+                type(IERC4907).interfaceId
             ),
-            "not ERC721"
+            "original NFT is not IERC4907"
         );
         require(
             doNftMapping[originalAddress][gameKey] == address(0),
-            "already create"
+            "depolyed already"
         );
         bytes memory _data = abi.encodeWithSignature(
             "initialize(string,string,address,address,address,address,address)",
@@ -77,7 +87,7 @@ contract DoNFTFactory is OwnableContract {
         );
     }
 
-    function deployWrapERC721DualRole(
+    function deployWrapNFT(
         string memory name,
         string memory symbol,
         address originalAddress
@@ -88,6 +98,13 @@ contract DoNFTFactory is OwnableContract {
             ),
             "not ERC721"
         );
+        require(
+            !IERC165(originalAddress).supportsInterface(
+                type(IERC4907).interfaceId
+            ),
+            "the NFT is IERC4907 already"
+        );
+
         wrapNFT = new WrapERC721DualRole(name, symbol, originalAddress);
         emit DeployWrapERC721DualRole(
             address(wrapNFT),
@@ -97,11 +114,7 @@ contract DoNFTFactory is OwnableContract {
         );
     }
 
-    function setBeacon(address beacon_) public onlyAdmin {
-        beacon = beacon_;
-    }
-
-    function getDoNFTProxy(address nftAddress, string calldata gameKey)
+    function getDoNFT(address nftAddress, string calldata gameKey)
         public
         view
         returns (address)

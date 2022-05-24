@@ -122,4 +122,20 @@ contract MiddleWare {
             }
         }
     }
+
+    function batchIsApprovedForAll(address owner, address operator, address[] calldata erc721Array) external view returns (bool[] memory results) {
+        results = new bool[](erc721Array.length);
+        for(uint i = 0; i < erc721Array.length; i++) {
+            results[i] = IERC721(erc721Array[i]).isApprovedForAll(owner, operator);
+        }
+    }
+
+    function batchGetDoNftIdByONftId(address[] calldata doNftAddressArray, uint256[] calldata oNftIdArray) external view returns (uint256[] memory doNftIdArray) {
+        require(doNftAddressArray.length == oNftIdArray.length, "invalid input data");
+        doNftIdArray = new uint256[](doNftAddressArray.length);
+        for(uint i = 0; i < doNftAddressArray.length; i++) {
+            doNftIdArray[i] = IDoNFT(doNftAddressArray[i]).getVNftId(oNftIdArray[i]);
+        }
+    }
+
 }

@@ -86,6 +86,7 @@ contract ComplexDoNFT is WrapDoNFT, Royalty, IComplexDoNFT {
             type(uint64).max
         );
         oid2vid[oid] = tid;
+        IERC4907(oNftAddress).setUser(oid, lastOwner, type(uint64).max);
     }
 
     function checkIn(
