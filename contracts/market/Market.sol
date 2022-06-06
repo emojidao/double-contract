@@ -342,7 +342,10 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
 
         if (pNormal.token == address(0)) {
             require(msg.value >= totalPrice, "payment is not enough");
-            Address.sendValue(payable(ERC721(nftAddress).ownerOf(nftId)), leftTotalPrice);
+            Address.sendValue(
+                payable(ERC721(nftAddress).ownerOf(nftId)),
+                leftTotalPrice
+            );
             if (msg.value > totalPrice) {
                 Address.sendValue(payable(msg.sender), msg.value - totalPrice);
             }
@@ -397,7 +400,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             uint256 balance = balanceOfFee[paymentTokens[index]];
             if (balance > 0) {
                 if (paymentTokens[index] == address(0)) {
-                    Address.sendValue(beneficiary,balance);
+                    Address.sendValue(beneficiary, balance);
                 } else {
                     SafeERC20.safeTransfer(
                         IERC20(paymentTokens[index]),
@@ -430,7 +433,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
             uint256 balance = royaltyMap[nftAddress][paymentTokens[index]];
             if (balance > 0) {
                 if (paymentTokens[index] == address(0)) {
-                    Address.sendValue(_beneficiary,balance);
+                    Address.sendValue(_beneficiary, balance);
                 } else {
                     SafeERC20.safeTransfer(
                         IERC20(paymentTokens[index]),
@@ -471,11 +474,16 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
         maxIndate = max_;
     }
 
-    function multicall(bytes[] calldata data) external returns(bytes[] memory results) {
+    function multicall(bytes[] calldata data)
+        external
+        returns (bytes[] memory results)
+    {
         results = new bytes[](data.length);
-        for(uint i = 0; i < data.length; i++) {
-            (bool success, bytes memory result) = address(this).delegatecall(data[i]);
-            if(success){
+        for (uint256 i = 0; i < data.length; i++) {
+            (bool success, bytes memory result) = address(this).delegatecall(
+                data[i]
+            );
+            if (success) {
                 results[i] = result;
             }
         }

@@ -123,10 +123,10 @@ contract MiddleWare {
         }
     }
 
-    function batchIsApprovedForAll(address owner, address operator, address[] calldata erc721Array) external view returns (bool[] memory results) {
+    function batchIsApprovedForAll(address owner, address[] calldata operators, address[] calldata erc721Array) external view returns (bool[] memory results) {
         results = new bool[](erc721Array.length);
         for(uint i = 0; i < erc721Array.length; i++) {
-            results[i] = IERC721(erc721Array[i]).isApprovedForAll(owner, operator);
+            results[i] = IERC721(erc721Array[i]).isApprovedForAll(owner, operators[i]);
         }
     }
 
