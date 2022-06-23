@@ -19,6 +19,3 @@ Community: https://discord.gg/8MNtaMEENf
 
 Documentation:https://app.gitbook.com/s/UIxGyzFg46yridrhqWLS/concepts
 
-![avatar](./Overview.png)
-
-
