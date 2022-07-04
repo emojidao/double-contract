@@ -303,7 +303,7 @@ contract Market is OwnableContract, ReentrancyGuardUpgradeable, IMarket {
         );
         PaymentNormal storage pNormal = paymentNormalMap[nftAddress][nftId];
         emit FulfillOrder(
-            user,
+            msg.sender,
             lending.lender,
             nftAddress,
             nftId,
