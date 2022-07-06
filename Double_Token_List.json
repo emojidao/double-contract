@@ -1,0 +1,126 @@
+{
+  "name": "Double Token List",
+  "logoURI": "https://cdn.double.one/new-double/logo/double-01.png",
+  "keywords": [
+      "NFT Rental",
+      "Double",
+      "GameFi",
+      "NFTFi",
+      "Double",
+      "loserchick",
+      "chick",
+      "egg"
+    ],
+    "timestamp": "2022-06-24T00:00:00.305Z",
+    "tokens": [
+      {
+      "chainId": 1,
+      "address": "0x0F5D2fB29fb7d3CFeE444a200298f468908cC942",
+      "name": "Decentraland MANA",
+      "symbol": "MANA",
+      "decimals": 18,
+      "logoURI": "https://etherscan.io/token/images/decentraland_32.png?v=1"
+      },
+      {
+      "chainId": 1,
+      "address": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+      "name": "Ethereum Name Service",
+      "symbol": "ENS",
+      "decimals": 18,
+      "logoURI": "https://etherscan.io/token/images/ens2_32.png?v=2"
+      },
+      {
+      "chainId": 1,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "decimals": 6,
+      "logoURI": "https://etherscan.io/token/images/centre-usdc_28.png"
+      },
+      {
+      "chainId": 1,
+      "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "name": "Tether USD",
+      "symbol": "USDT",
+      "decimals": 6,
+      "logoURI": "https://etherscan.io/token/images/tether_32.png"
+      },
+      {
+      "chainId": 56,
+      "address": "0xa9d75cc3405f0450955050c520843f99aff8749d",
+      "name": "Warena Token",
+      "symbol": "RENA",
+      "decimals": 18,
+      "logoURI": "https://etherscan.io/token/images/tether_32.png"
+      },
+      {
+      "chainId": 56,
+      "address": "0x55d398326f99059fF775485246999027B3197955",
+      "name": "Binance-Peg BSC-USD",
+      "symbol": "USDT",
+      "decimals": 18,
+      "logoURI": "https://bscscan.com/token/images/busdt_32.png"
+      },
+      {
+      "chainId": 56,
+      "address": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+      "name": "Binance-Peg USD Coin",
+      "symbol": "USDC",
+      "decimals": 18,
+      "logoURI": "https://bscscan.com/token/images/centre-usdc_28.png"
+      },
+      {
+      "chainId": 56,
+      "address": "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+      "name": "Binance-Peg BUSD Token",
+      "symbol": "BUSD",
+      "decimals": 18,
+      "logoURI": "https://bscscan.com/token/images/busd_32.png"
+      },
+      {
+      "chainId": 137,
+      "address": "0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4",
+      "name": "Decentraland MANA",
+      "symbol": "MANA",
+      "decimals": 18,
+      "logoURI": "https://polygonscan.com/token/images/decentraland_32.png"
+      },
+      {
+      "chainId": 137,
+      "address": "0x9e725Cf7265D12fd5f59499AFf1258CA92CAc74d",
+      "name": "LoserChick",
+      "symbol": "CHICK",
+      "decimals": 18,
+      "logoURI": "https://polygonscan.com/token/images/loserchickchick_32.png"
+      },
+      {
+      "chainId": 137,
+      "address": "0x245e5ddb65eFea6522Fa913229dF1f4957fB2e21",
+      "name": "LoserChickEGG",
+      "symbol": "EGG",
+      "decimals": 18,
+      "logoURI": "https://polygonscan.com/token/images/loserchickegg_32.png"
+      },
+      {
+      "chainId": 137,
+      "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+      "name": "USD Coin(PoS)",
+      "symbol": "USDC",
+      "decimals": 6,
+      "logoURI": "https://polygonscan.com/token/images/centre-usdc_32.png"
+      },
+      {
+      "chainId": 137,
+      "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+      "name": "(PoS) Tether USD",
+      "symbol": "USDT",
+      "decimals": 6,
+      "logoURI": "https://polygonscan.com/token/images/tether_32.png"
+      },
+    ],
+    "version": {
+      "major": 0,
+      "minor": 0,
+      "patch": 0
+    }
+}
