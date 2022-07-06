@@ -116,7 +116,7 @@
       "symbol": "USDT",
       "decimals": 6,
       "logoURI": "https://polygonscan.com/token/images/tether_32.png"
-      },
+      }
     ],
     "version": {
       "major": 0,
